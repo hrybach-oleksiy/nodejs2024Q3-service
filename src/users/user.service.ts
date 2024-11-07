@@ -10,7 +10,7 @@ import { User } from './user.interface';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 
 @Injectable()
-export class UsersService {
+export class UserService {
   private users: User[] = [];
 
   private excludePassword(user: User): Omit<User, 'password'> {
@@ -60,6 +60,14 @@ export class UsersService {
     id: string,
     updatePasswordDto: UpdatePasswordDto,
   ): Omit<User, 'password'> {
+    if (
+      !updatePasswordDto ||
+      !updatePasswordDto.oldPassword ||
+      !updatePasswordDto.newPassword
+    ) {
+      throw new BadRequestException('Body does not contain required fields');
+    }
+
     if (!isUuid(id)) {
       throw new BadRequestException('Invalid user ID format');
     }
