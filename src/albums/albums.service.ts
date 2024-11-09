@@ -7,9 +7,12 @@ import { v4 as uuidv4, validate as isUuid } from 'uuid';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import Album from './album.intarface';
+import { TracksService } from 'src/tracks/tracks.service';
 
 @Injectable()
 export class AlbumsService {
+  constructor(private readonly tracksService: TracksService) {}
+
   private albums: Album[] = [];
 
   findAll() {
@@ -50,33 +53,35 @@ export class AlbumsService {
     }
 
     if (!isUuid(id)) {
-      throw new BadRequestException('Invalid artist ID format');
+      throw new BadRequestException('Invalid album ID format');
     }
 
     const album = this.albums.find((album) => album.id === id);
 
     if (!album) {
-      throw new NotFoundException('Artist not found');
+      throw new NotFoundException('Album not found');
     }
 
     album.name = updateAlbumDto.name;
     album.year = updateAlbumDto.year;
+    album.artistId = updateAlbumDto.artistId;
 
     return album;
   }
 
   remove(id: string) {
     if (!isUuid(id)) {
-      throw new BadRequestException('Invalid artist ID format');
+      throw new BadRequestException('Invalid album ID format');
     }
 
     const index = this.albums.findIndex((artist) => artist.id === id);
 
     if (index === -1) {
-      throw new NotFoundException('Artist not found');
+      throw new NotFoundException('Album not found');
     }
 
     this.albums.splice(index, 1);
+    this.tracksService.nullifyAlbumIdInTracks(id);
   }
 
   nullifyArtistIdInAlbums(artistId: string): void {
