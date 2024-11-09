@@ -39,7 +39,6 @@ export class TracksService {
       id: uuidv4(),
       ...createTrackDto,
     };
-    this.tracks.push(newTrack);
 
     this.tracks.push(newTrack);
 
@@ -81,7 +80,11 @@ export class TracksService {
     }
 
     this.tracks.splice(index, 1);
+  }
 
-    console.log('tracks', this.tracks);
+  nullifyArtistIdInTracks(artistId: string): void {
+    this.tracks = this.tracks.map((track) =>
+      track.artistId === artistId ? { ...track, artistId: null } : track,
+    );
   }
 }

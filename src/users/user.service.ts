@@ -60,22 +60,21 @@ export class UserService {
     id: string,
     updatePasswordDto: UpdatePasswordDto,
   ): Omit<User, 'password'> {
-    if (
-      !updatePasswordDto ||
-      !updatePasswordDto.oldPassword ||
-      !updatePasswordDto.newPassword
-    ) {
-      throw new BadRequestException('Body does not contain required fields');
+    const user = this.users.find((user) => user.id === id);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
     }
 
     if (!isUuid(id)) {
       throw new BadRequestException('Invalid user ID format');
     }
 
-    const user = this.users.find((user) => user.id === id);
-
-    if (!user) {
-      throw new NotFoundException('User not found');
+    if (
+      !updatePasswordDto.hasOwnProperty('oldPassword') ||
+      !updatePasswordDto.hasOwnProperty('newPassword')
+    ) {
+      throw new BadRequestException('Body does not contain required fields');
     }
 
     if (user.password !== updatePasswordDto.oldPassword) {
