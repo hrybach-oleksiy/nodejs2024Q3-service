@@ -9,12 +9,13 @@ import { UpdateArtistDto } from './dto/update-artist.dto';
 import Artist from './artist.interface';
 import { TracksService } from 'src/tracks/tracks.service';
 import { AlbumsService } from 'src/albums/albums.service';
+// import { FavoritesService } from '../favorites/favorites.service';
 
 @Injectable()
 export class ArtistsService {
   constructor(
     private readonly tracksService: TracksService,
-    private readonly albumsService: AlbumsService,
+    private readonly albumsService: AlbumsService, // private readonly favoritesService: FavoritesService,
   ) {}
 
   private artists: Artist[] = [];
@@ -28,13 +29,13 @@ export class ArtistsService {
       throw new BadRequestException('Invalid artist ID format');
     }
 
-    const track = this.artists.find((artist) => artist.id === id);
+    const artist = this.artists.find((artist) => artist.id === id);
 
-    if (!track) {
+    if (!artist) {
       throw new NotFoundException('Artist not found');
     }
 
-    return track;
+    return artist;
   }
 
   create(createArtistDto: CreateArtistDto) {

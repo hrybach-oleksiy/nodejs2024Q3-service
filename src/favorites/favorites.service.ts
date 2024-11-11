@@ -1,26 +1,76 @@
-import { Injectable } from '@nestjs/common';
-import { CreateFavoriteDto } from './dto/create-favorite.dto';
-import { UpdateFavoriteDto } from './dto/update-favorite.dto';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
+import { validate as isUuid } from 'uuid';
+import Track from 'src/tracks/track.interface';
+import Album from 'src/albums/album.intarface';
+import Artist from 'src/artists/artist.interface';
+import { FavoritesResponse } from './favorites.interface';
 
 @Injectable()
 export class FavoritesService {
-  create(createFavoriteDto: CreateFavoriteDto) {
-    return 'This action adds a new favorite';
+  private favoriteTracks: Track[] = [];
+  private favoriteAlbums: Album[] = [];
+  private favoriteArtists: Artist[] = [];
+
+  public validateUuid(id: string) {
+    if (!isUuid(id)) {
+      throw new BadRequestException('Invalid ID format');
+    }
   }
 
-  findAll() {
-    return `This action returns all favorites`;
+  public entityExists(entity, id: string) {
+    if (!entity) {
+      throw new UnprocessableEntityException(
+        `Entity with id ${id} does not exist`,
+      );
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} favorite`;
+  findAll(): FavoritesResponse {
+    return {
+      artists: this.favoriteArtists,
+      albums: this.favoriteAlbums,
+      tracks: this.favoriteTracks,
+    };
   }
 
-  update(id: number, updateFavoriteDto: UpdateFavoriteDto) {
-    return `This action updates a #${id} favorite`;
+  addTrackToFavorites(track: Track): { message: string } {
+    this.favoriteTracks.push(track);
+    return { message: 'Track added to favorites' };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} favorite`;
+  removeTrackFromFavorites(id: string) {
+    const index = this.favoriteTracks.findIndex((track) => track.id === id);
+    if (index === -1)
+      throw new NotFoundException('Track not found in favorites');
+    this.favoriteTracks.splice(index, 1);
+  }
+
+  addAlbumToFavorites(album: Album): { message: string } {
+    this.favoriteAlbums.push(album);
+    return { message: 'Album added to favorites' };
+  }
+
+  removeAlbumFromFavorites(id: string) {
+    const index = this.favoriteAlbums.findIndex((album) => album.id === id);
+    if (index === -1)
+      throw new NotFoundException('Album not found in favorites');
+    this.favoriteAlbums.splice(index, 1);
+  }
+
+  addArtistToFavorites(artist: Artist): { message: string } {
+    this.favoriteArtists.push(artist);
+    return { message: 'Artist added to favorites' };
+  }
+
+  removeArtistFromFavorites(id: string) {
+    const index = this.favoriteArtists.findIndex((artist) => artist.id === id);
+    if (index === -1)
+      throw new NotFoundException('Artist not found in favorites');
+    this.favoriteArtists.splice(index, 1);
   }
 }

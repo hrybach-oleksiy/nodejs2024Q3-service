@@ -1,34 +1,74 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Param, Delete, HttpCode } from '@nestjs/common';
 import { FavoritesService } from './favorites.service';
-import { CreateFavoriteDto } from './dto/create-favorite.dto';
-import { UpdateFavoriteDto } from './dto/update-favorite.dto';
+import { AlbumsService } from 'src/albums/albums.service';
+import { TracksService } from 'src/tracks/tracks.service';
+import { ArtistsService } from 'src/artists/artists.service';
 
-@Controller('favorites')
+@Controller('favs')
 export class FavoritesController {
-  constructor(private readonly favoritesService: FavoritesService) {}
-
-  @Post()
-  create(@Body() createFavoriteDto: CreateFavoriteDto) {
-    return this.favoritesService.create(createFavoriteDto);
-  }
+  constructor(
+    private readonly favoritesService: FavoritesService,
+    private readonly albumService: AlbumsService,
+    private readonly trackService: TracksService,
+    private readonly artistService: ArtistsService,
+  ) {}
 
   @Get()
   findAll() {
     return this.favoritesService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.favoritesService.findOne(+id);
+  @Post('/track/:id')
+  async addTrackToFavorites(@Param('id') id: string) {
+    this.favoritesService.validateUuid(id);
+
+    const track = this.trackService.findOne(id);
+
+    this.favoritesService.entityExists(track, id);
+
+    return this.favoritesService.addTrackToFavorites(track);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateFavoriteDto: UpdateFavoriteDto) {
-    return this.favoritesService.update(+id, updateFavoriteDto);
+  @Delete('/track/:id')
+  @HttpCode(204)
+  removeTrackFromFavorites(@Param('id') id: string) {
+    this.favoritesService.validateUuid(id);
+    this.favoritesService.removeTrackFromFavorites(id);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.favoritesService.remove(+id);
+  @Post('/album/:id')
+  async addAlbumToFavorites(@Param('id') id: string) {
+    this.favoritesService.validateUuid(id);
+
+    const album = this.albumService.findOne(id);
+
+    this.favoritesService.entityExists(album, id);
+
+    return this.favoritesService.addAlbumToFavorites(album);
+  }
+
+  @Delete('/album/:id')
+  @HttpCode(204)
+  removeAlbumFromFavorites(@Param('id') id: string) {
+    this.favoritesService.validateUuid(id);
+    this.favoritesService.removeAlbumFromFavorites(id);
+  }
+
+  @Post('/artist/:id')
+  async addArtistToFavorites(@Param('id') id: string) {
+    this.favoritesService.validateUuid(id);
+
+    const artist = this.artistService.findOne(id);
+
+    this.favoritesService.entityExists(artist, id);
+
+    return this.favoritesService.addArtistToFavorites(artist);
+  }
+
+  @Delete('/artist/:id')
+  @HttpCode(204)
+  removeArtistFromFavorites(@Param('id') id: string) {
+    this.favoritesService.validateUuid(id);
+    this.favoritesService.removeArtistFromFavorites(id);
   }
 }
