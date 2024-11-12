@@ -14,7 +14,7 @@ git clone [{repository URL}](https://github.com/hrybach-oleksiy/nodejs2024Q3-ser
 ## Installing NPM modules
 
 ```
-npm install
+npm install --legacy-peer-deps
 ```
 
 ## Running application
